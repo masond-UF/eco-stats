@@ -53,9 +53,11 @@ cv <- sd(x)/mean(x)
 # 2. Modify the quantile statement above to return the 25th, 50th and 75th percentiles. 
 quantile(x, probs=c(0.25, 0.5, 0.75))
 # 3. Try replacing the cbind command in the variance calculation above with rbind. Ex-
-quantile(x, probs=c(0.25, 0.5, 0.75))
-
 # plain the difference in output.
+y <- rnorm(length(x), mean=3+2*x,sd=1)
+var(rbind(x,y))
+# The object the variance function was run on is different because rbind
+# combined x and y by row rather than column
 # Exercise 6 ####
 # 1. Try the following
 set.seed(6)
@@ -67,20 +69,45 @@ set.seed(6)
 rnorm(5,0,1)
 rnorm(5,0,1)
 # Explain the different outputs.
+# The number used to initiate random numbers determines what will be generated.
+# From this starting point, subsequent generations will be different. We reset
+# the seed in the initial example, providing the same output; we didn't do this
+# in the second example.
 # 2. What happens if you change the seed in the fourth line?
+# You get different values in the random number generation
 # Exercise 7 ####
 # 1. Try to read a file that you create into R. Some hints: 
 # If using Excel, save file as ”Tab Delimited Text (.csv)”. 
 # If you include row names in your file you need to include 
 # append=T as an argument in read.table
+write.csv(ex, "ex1.csv")
+d <- read.csv("ex1.csv")
 # Exercise 8 ####
 # 1. Write a while loop that finds the numerical limit of R. 
 # This means you need to find the power x of 10x that R treats as infinite. 
 # You can use the function is.finite().
+x=1
+i=1
+while(is.finite(x) == TRUE){
+	i <- i+1
+	x <- 10^(i)
+	print(c(x,i))
+}
 # 2. Write a for loop that will print out ith iteration where i goes from 1 to 100.
+for(i in 0:99){
+	i <- i+1
+	print(i)
+}
 # 3. Use a for loop to write a simple yearly population growth model.
 # Let the initial population size be 10 and assume that each 
 # individual has 2 offspring, then dies.
+pop = 10
+
+for (i in 1:10){
+	pop = (2*pop) - pop
+	print(pop)
+}
+
 # Bonus 1 ####
 # 1. Construct a function that calculates a one or two sided t-test, for an 
 # arbitrary t-statistic and sample size. You can use the pt function.
