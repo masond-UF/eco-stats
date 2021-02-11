@@ -29,4 +29,37 @@ for(j in 1:length(samp)){
 # d = the theoretical mean of the sampling mean is the population mean?
 # d = PDF of sampling distribution approaches normal distribution at large sample sizes
 
+# 6 ####
+d <- c(200, 183, 171, 154, 140, 128, 113, 97, 87, 84, 71,
+			 66, 61, 58, 53, 48, 46, 43, 40, 35, 33, 31, 28, 26)
+a <- c(200,200,183,171, 154, 140, 128, 113, 97, 87, 84, 71,
+			 66, 61, 58, 53, 48, 46, 43, 40, 35, 33, 31, 28)
+all.p <- vector()
+
+for(i in 1:length(d)){
+	all.p[i] <- d[i]/a[i]
+}
+
+mean(all.p)
+
+d <- vector()
+pop <- 200
+p <- 0.90
+
+for(i in 1:24){
+	pop <- rbinom(1,pop,p)
+	d[i] <- pop
+}
+
+for(j in 1:2000){
+	mat <- matrix(nrow = 2000, ncol = 24)
+	means <- vector()
+	pop <- 200
+		for(i in 1:24){
+		pop <- rbinom(1,pop,p)
+		mat[i] <- pop/pop # wrong
+		means[i] <- mean(mat[i,])
+		}
+	hist(means)
+}
 
