@@ -1,5 +1,6 @@
 # HW 3—Eco stats
 # 10 Feb 2021—David S. Mason
+library(ggplot2)
 # Q3 ####
 x <- seq(-5, 15, 0.1)
 
@@ -29,19 +30,48 @@ for(j in 1:length(samp)){
 # d = the theoretical mean of the sampling mean is the population mean?
 # d = PDF of sampling distribution approaches normal distribution at large sample sizes
 
-# 6 ####
-d <- c(200, 183, 171, 154, 140, 128, 113, 97, 87, 84, 71,
+# Q6a ####
+pop <- c(200, 183, 171, 154, 140, 128, 113, 97, 87, 84, 71,
 			 66, 61, 58, 53, 48, 46, 43, 40, 35, 33, 31, 28, 26)
-a <- c(200,200,183,171, 154, 140, 128, 113, 97, 87, 84, 71,
-			 66, 61, 58, 53, 48, 46, 43, 40, 35, 33, 31, 28)
-all.p <- vector()
+p <- seq(0,1,0.01)
+ln.ll.p <- vector("list", length(pop))
 
-for(i in 1:length(d)){
-	all.p[i] <- d[i]/a[i]
+question6 <- function(pop, p){
+	
+for(i in 1:length(pop)){
+	if(pop[i] == 200){
+	ln.ll.p[[i]] <- dbinom(pop[i], pop[i], p, log = TRUE)
+	}
+	else{
+	ln.ll.p[[i]] <- dbinom(pop[i], pop[i-1], p, log = TRUE)
+	}
 }
 
-mean(all.p)
+joint.probability <- as.vector(ln.ll.p[[1]]+ln.ll.p[[2]]+ln.ll.p[[3]]+
+		ln.ll.p[[4]]+ln.ll.p[[5]]+ln.ll.p[[6]]+ln.ll.p[[7]]+
+		ln.ll.p[[8]]+ln.ll.p[[9]]+ln.ll.p[[10]]+ln.ll.p[[11]]+
+		ln.ll.p[[12]]+ln.ll.p[[13]]+ln.ll.p[[14]]+ln.ll.p[[15]]+
+		ln.ll.p[[16]]+ln.ll.p[[17]]+ln.ll.p[[18]]+ln.ll.p[[19]]+
+		ln.ll.p[[20]]+ln.ll.p[[21]]+ln.ll.p[[22]]+ln.ll.p[[23]]+ln.ll.p[[24]])
 
+joint.probability <- as.data.frame(joint.probability)
+
+joint.probability <- cbind(joint.probability, p)
+
+ggplot(d = joint.probability, aes(x = p, y = joint.probability))+
+			 	geom_line(color = "red")+
+				geom_vline(xintercept = p[which.max(joint.probability$joint.probability)], 
+									 color="black",size=1)+
+				xlab("Joint probability of survival")+
+				ylab("-Log Likelihood")+
+				scale_x_continuous(breaks=seq(0, 1, 0.1))+
+				scale_y_continuous(breaks=seq(-8000,0, 1000))+
+				theme_classic()
+
+return(joint.probability)
+}
+
+# Q6b ####
 d <- vector()
 pop <- 200
 p <- 0.90
@@ -50,16 +80,120 @@ for(i in 1:24){
 	pop <- rbinom(1,pop,p)
 	d[i] <- pop
 }
+# Q6c ####
+
+output <- list()
+pop <- 200
+p <- 0.90
 
 for(j in 1:2000){
-	mat <- matrix(nrow = 2000, ncol = 24)
-	means <- vector()
+	d <- vector()
 	pop <- 200
 		for(i in 1:24){
 		pop <- rbinom(1,pop,p)
-		mat[i] <- pop/pop # wrong
-		means[i] <- mean(mat[i,])
+		d[i] <- pop
 		}
-	hist(means)
+	output[[j]] <- d
 }
 
+mle.output <- vector()
+p <- seq(0,1,0.01)
+
+
+for(i in 1:2000){
+ 	current.vec <- output[[i]]
+ 	ln.ll.p <- vector("list", length = 24)
+			for(j in 1:24){
+				if(current.vec[j] == max(current.vec)){
+				ln.ll.p[[j]] <- dbinom(current.vec[j],
+														 current.vec[j], p, log = TRUE)
+					}
+				else{
+				ln.ll.p[[j]] <- dbinom(current.list[j], current.list[j-1], p, log = TRUE)
+				}
+			}
+	  joint.probability <- as.vector(ln.ll.p[[1]]+ln.ll.p[[2]]+ln.ll.p[[3]]+
+												ln.ll.p[[4]]+ln.ll.p[[5]]+ln.ll.p[[6]]+ln.ll.p[[7]]+
+												ln.ll.p[[8]]+ln.ll.p[[9]]+ln.ll.p[[10]]+ln.ll.p[[11]]+
+												ln.ll.p[[12]]+ln.ll.p[[13]]+ln.ll.p[[14]]+ln.ll.p[[15]]+
+												ln.ll.p[[16]]+ln.ll.p[[17]]+ln.ll.p[[18]]+ln.ll.p[[19]]+
+												ln.ll.p[[20]]+ln.ll.p[[21]]+ln.ll.p[[22]]+ln.ll.p[[23]]+ln.ll.p[[24]])
+		
+		joint.probability <- as.data.frame(joint.probability)
+		joint.probability <- cbind(joint.probability, p)
+		
+		mle.p <- joint.probability$p[joint.probability$joint.probability == max(joint.probability$joint.probability)] 
+ 		mle.output[i] <- mle.p
+}
+
+plot(mle.output)
+										
+# Q7 ####
+input <- list(seq(0:8), seq(0:12), seq(0:25),
+					 seq(0:50), seq(0:100), seq(0:200))
+size <- c(50, 100, 200, 400, 800, 1600)
+p <- 0.0588
+m <- c(12, 25, 50, 100, 200, 400)
+n <- c(200, 400, 800, 1600, 3200, 6400)
+k <- c(50, 100, 200, 400, 800, 1600)
+
+for(i in 1:6){
+	title <-
+	x <- input[[i]]
+	par(mfrow=c(1,2))
+	plot(dbinom(x = x, size = size[i], p = p), main = "Binomial") 
+	plot(dhyper(x = x, m = m[i], n = n[i], k = k[i]), main = "Hypergeometric") 
+}
+
+x <- 0:8
+plot(dbinom(x, 50, 0.0588)) 
+plot(dhyper(x, 12, 200, 50)) 
+
+x <- 0:12
+plot(dbinom(x, 100, 0.0588)) 
+plot(dhyper(x, 25, 400, 100)) 
+
+x <- 0:25
+plot(dbinom(x, 200, 0.0588)) 
+plot(dhyper(x, 50, 800, 200)) 
+
+x <- 0:50
+plot(dbinom(x, 400, 0.0588)) 
+plot(dhyper(x, 100, 1600, 400)) 
+
+x <- 0:100
+plot(dbinom(x, 800, 0.0588)) 
+plot(dhyper(x, 200, 3200, 800)) 
+
+x <- 0:200
+plot(dbinom(x, 1600, 0.0588)) 
+plot(dhyper(x, 400, 6400, 1600)) 
+
+# Q10 ####
+d <- c(74, 72, 51, 6, 6, 6)
+goat.mat <- matrix(d, nrow = 3, ncol = 2)
+unmarked <- goat.mat[,1] - goat.mat[,2]
+d <- c(74, 72, 51, 6, 6, 6, 68, 66, 45)
+goat.mat <- matrix(d, nrow = 3, ncol = 3)
+rownames(goat.mat) <- c('Flight 1', 'Flight 2', 'Flight 3')
+colnames(goat.mat) <- c('Total goats', 'Marked goats', 'Unmarked goats')
+
+t <- seq(75,400,1) # total animals N
+m <- 13 # marked animals (t)
+n <- goat.mat[1,1] # k
+x <- goat.mat[1,2] # r
+
+ln.ll.h <- (dhyper(goat.mat[1,2], m, t-m, goat.mat[1,1]))*
+					 (dhyper(goat.mat[2,2], m, t-m, goat.mat[2,1]))*
+					 (dhyper(goat.mat[3,2], m, t-m, goat.mat[3,1]))
+table <- as.data.frame(cbind(ln.ll.h, t))
+
+ggplot(d = table, aes(x = t, y = ln.ll.h))+
+				geom_line(color = "red")+
+				geom_vline(xintercept = t[which.max(table$ln.ll.h)], 
+									 color="black",size=1)+
+				xlab("Total population")+
+				ylab("Likelihood")+
+				scale_x_continuous(breaks=seq(0, 400, 50))+
+				theme_classic()
+	
