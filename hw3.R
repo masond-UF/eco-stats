@@ -30,14 +30,12 @@ for(j in 1:length(samp)){
 # d = the theoretical mean of the sampling mean is the population mean?
 # d = PDF of sampling distribution approaches normal distribution at large sample sizes
 
-# Q6a ####
+# Q6b ####
 pop <- c(200, 183, 171, 154, 140, 128, 113, 97, 87, 84, 71,
 			 66, 61, 58, 53, 48, 46, 43, 40, 35, 33, 31, 28, 26)
 p <- seq(0,1,0.01)
 ln.ll.p <- vector("list", length(pop))
 
-question6 <- function(pop, p){
-	
 for(i in 1:length(pop)){
 	if(pop[i] == 200){
 	ln.ll.p[[i]] <- dbinom(pop[i], pop[i], p, log = TRUE)
@@ -69,17 +67,7 @@ ggplot(d = joint.probability, aes(x = p, y = joint.probability))+
 				theme_classic()
 
 return(joint.probability)
-}
 
-# Q6b ####
-d <- vector()
-pop <- 200
-p <- 0.90
-
-for(i in 1:24){
-	pop <- rbinom(1,pop,p)
-	d[i] <- pop
-}
 # Q6c ####
 
 output <- list()
@@ -96,9 +84,10 @@ for(j in 1:2000){
 	output[[j]] <- d
 }
 
+# Q6d ####
+
 mle.output <- vector()
 p <- seq(0,1,0.01)
-
 
 for(i in 1:2000){
  	current.vec <- output[[i]]
@@ -109,7 +98,7 @@ for(i in 1:2000){
 														 current.vec[j], p, log = TRUE)
 					}
 				else{
-				ln.ll.p[[j]] <- dbinom(current.list[j], current.list[j-1], p, log = TRUE)
+				ln.ll.p[[j]] <- dbinom(current.vec[j], current.vec[j-1], p, log = TRUE)
 				}
 			}
 	  joint.probability <- as.vector(ln.ll.p[[1]]+ln.ll.p[[2]]+ln.ll.p[[3]]+
@@ -126,8 +115,14 @@ for(i in 1:2000){
  		mle.output[i] <- mle.p
 }
 
-plot(mle.output)
-										
+mle.output <- as.data.frame(mle.output)
+mle.output$MLE <- mle.output$mle.output
+
+ggplot(d = mle.output, aes(x = MLE))+
+				geom_histogram(bins = 10)+
+				ylab("Frequency")+
+				theme_classic()
+
 # Q7 ####
 input <- list(seq(0:8), seq(0:12), seq(0:25),
 					 seq(0:50), seq(0:100), seq(0:200))
@@ -137,37 +132,12 @@ m <- c(12, 25, 50, 100, 200, 400)
 n <- c(200, 400, 800, 1600, 3200, 6400)
 k <- c(50, 100, 200, 400, 800, 1600)
 
-for(i in 1:6){
-	title <-
+for(i in 1:6){ # SCROLL BACK SIX PLOTS TO SEE THE BEGINNING
 	x <- input[[i]]
 	par(mfrow=c(1,2))
 	plot(dbinom(x = x, size = size[i], p = p), main = "Binomial") 
 	plot(dhyper(x = x, m = m[i], n = n[i], k = k[i]), main = "Hypergeometric") 
 }
-
-x <- 0:8
-plot(dbinom(x, 50, 0.0588)) 
-plot(dhyper(x, 12, 200, 50)) 
-
-x <- 0:12
-plot(dbinom(x, 100, 0.0588)) 
-plot(dhyper(x, 25, 400, 100)) 
-
-x <- 0:25
-plot(dbinom(x, 200, 0.0588)) 
-plot(dhyper(x, 50, 800, 200)) 
-
-x <- 0:50
-plot(dbinom(x, 400, 0.0588)) 
-plot(dhyper(x, 100, 1600, 400)) 
-
-x <- 0:100
-plot(dbinom(x, 800, 0.0588)) 
-plot(dhyper(x, 200, 3200, 800)) 
-
-x <- 0:200
-plot(dbinom(x, 1600, 0.0588)) 
-plot(dhyper(x, 400, 6400, 1600)) 
 
 # Q10 ####
 d <- c(74, 72, 51, 6, 6, 6)
@@ -177,6 +147,8 @@ d <- c(74, 72, 51, 6, 6, 6, 68, 66, 45)
 goat.mat <- matrix(d, nrow = 3, ncol = 3)
 rownames(goat.mat) <- c('Flight 1', 'Flight 2', 'Flight 3')
 colnames(goat.mat) <- c('Total goats', 'Marked goats', 'Unmarked goats')
+print(goat.mat)
+
 
 t <- seq(75,400,1) # total animals N
 m <- 13 # marked animals (t)
