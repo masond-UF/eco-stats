@@ -203,8 +203,8 @@ x <- runif(n=200,min=-3, max=3) # Values of the covariate chosen at random
 hist(x)
 
 # Setting P(success) as a function of a covariate
-beta0 <- 1.43
-beta1 <- 3.15 # Try lower values and higher values
+beta0 <- 1.5
+beta1 <- 2.85 # Try lower values and higher values
 real.p <- 1/(1+exp(-(beta0+beta1*x)))
 plot(x,real.p, pch=16) # Checking out that simulations make sense
 
@@ -231,7 +231,22 @@ negll.logit(data = x, par = guess) # check
 ml.estim <- optim(par = guess, fn = negll.logit, 
 						method = "Nelder-Mead", data = x, hessian = TRUE)
 
-ml.estim$par
-# a = b0 = 51.392412
-# b = b1 = -3.063028
+mles <- ml.estim$par
+# a = b0 = 44
+# b = b1 = -0.85 
+# these don't look right
 
+my.hess <- ml.estim$hessian # the hessian matrix is empty
+library("MASS") # for 'ginv'
+
+Fish.Inv <- ginv(my.hess)
+zalphahalf <- qnorm(p = 0.975, mean = 0, sd = 1)
+st.errs <- zalphahalf*sqrt(diag(Fish.Inv))	
+
+low.CIs <- mles - st.errs
+high.CIs <- mles + st.errs
+
+CIs.mat <- cbind(low.CIs, mles, high.CIs)
+colnames(CIs.mat) <- c("2.5%", "MLE", "97.5%")
+rownames(CIs.mat) <- c("Beta0", "Beta1")
+print(CIs.mat)
