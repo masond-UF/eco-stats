@@ -159,7 +159,7 @@ sim.null.theta.rd <- c(do.call(sum, sim.null[[i]])/sum(do.call(length, sim.null[
 																do.call(length, sim.null[[i]][2]),
 																do.call(length, sim.null[[i]][3])))
 
-sim.null.theta[[1]] <- sim.null.theta.rd
+sim.null.theta[[i]] <- sim.null.theta.rd
 
 # alt theta
 sim.alt.theta.rd <- c(do.call(sum, sim.null[[i]][1])/do.call(length, sim.null[[i]][1]),
@@ -170,14 +170,7 @@ sim.alt.theta[[i]] <- sim.alt.theta.rd
 }
 
 # negative log likelihood ratio
-
-sim.null <- as.numeric(sim.null)
-
 negloglik.rat <- vector(length = 2000)
-L0.boot <- vector(length=2000)
-L1.boot <- vector(length=2000)
-
-
 
 for(i in 1:2000){
 
@@ -195,4 +188,50 @@ L1.boot <-	prod(((exp(1)^sim.alt.theta[[i]][1])*(sim.alt.theta[[i]][1]^unlist(si
 negloglik.rat[i] <- (-2)*log(L0.boot/L1.boot)
 
 }
+
+hist(negloglik.rat)
+
+# Step 5
+# Observed value
+t1.g2 <- -2*(lnL0 - lnL1)  # 12.08075 
+PBLRT.pval <- length(which(negloglik.rat >= t1.g2))/length(negloglik.rat)
+# Question 7 ####
+# Simulating the data
+ntrials <- 1 # Binomial with number of trials = 1 is a Bernoulli!!
+nreps <- 200
+x <- runif(n=200,min=-3, max=3) # Values of the covariate chosen at random
+hist(x)
+
+# Setting P(success) as a function of a covariate
+beta0 <- 1.43
+beta1 <- 3.15 # Try lower values and higher values
+real.p <- 1/(1+exp(-(beta0+beta1*x)))
+plot(x,real.p, pch=16) # Checking out that simulations make sense
+
+# Simulating the data
+data.sim <- rbinom(n=nreps, size=ntrials, prob=real.p)
+
+# "raw data"
+my.data <- cbind(x,data.sim)
+colnames(my.data) <- c("covariate", "Successes!")
+
+# write function to estimate parameters
+negll.logit <- function(data, par){
+	x <- data
+ 	beta0 <- par[1]
+ 	beta1 <- par[2]
+	llike <- log(1/(1+exp(-(beta0+beta1*x))))
+	negll <- -sum(llike)
+	return(negll)
+}
+
+guess <- c(beta0, beta1)
+negll.logit(data = x, par = guess) # check
+
+ml.estim <- optim(par = guess, fn = negll.logit, 
+						method = "Nelder-Mead", data = x, hessian = TRUE)
+
+ml.estim$par
+# a = b0 = 51.392412
+# b = b1 = -3.063028
 
